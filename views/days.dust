@@ -1,0 +1,115 @@
+{>"layout" /}
+{<body}
+
+    <!-- Заголовки -->
+    
+    <div class="row">
+        <div class="col-1">Дни</div>
+        <div class="col-1">Пары</div>
+        {#groups}           
+                <div class="col-2">{group}</div>
+                           
+        {/groups}
+        
+    </div>
+    
+  <!-- Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop -->
+  {#classesOfWeekend }
+
+    <div class="row">
+        <div class="col-1">{day}</div>
+        
+        <div class="col-1">{time}</div> 
+
+        {#classies}
+        <div class="col-2">
+
+                <div class="card text-center" style="height: 200px; font-size: 0.6vw;">
+                        <div class="card-header" >
+                            <p>{lesson}</p>
+
+                        <button 
+                            class="btn btn-default edit-recipe"
+                            data-toggle="modal"
+                            data-target="#editFormModal"
+                            data-id="{id}"
+                            data-lesson="{lesson}"
+                            data-teacher="{teacher}"
+                            data-room="{room}">
+                            Изменить
+                        </button>
+                        
+                        </div>                                
+                        <div class="card-body" id="">
+                            <p class="card-text">
+                                {teacher}
+                            </p>
+                            <p class="card-text">
+                                (ауд. 122, к.4)
+                            </p>
+                        </div>
+                    </div>
+        </div>
+        {/classies}
+        
+        
+    </div>
+
+    {/classesOfWeekend} 
+
+
+<!-- Edit Form-->
+<div class="modal fade" id="editFormModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <form method="POST" action="/edit">
+            <input type="hidden" id="edit-form-id" name="class_id" />
+            <div class="modal-header">
+            <h5 class="modal-title" id="editFormModalLabel">Изменить Занятие</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Занятие</label>
+                    <input id="edit-form-lesson" type="text" class="form-control" name="lesson" />
+                </div>
+
+                <div class="form-group">
+                    <label>Преподаватель</label>
+                    <div class="input-group">
+                        <input id="edit-form-teacher" type="text" class="form-control" name="teacher"></input>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary dropdown-toggle dropbtn" onclick="myFunction()" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Выбрать</button>
+                            <div class="dropdown">
+                                <div id="myDropdown" class="dropdown-content">
+                                    <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+                                    {#teachers}
+                                        <a class="edit-teacher" href="#" data-name="{name}">{name}</a>
+                                    {/teachers}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              
+
+                <div class="form-group">
+                        <label>Аудитория</label>
+                        <textarea id="edit-form-room" class="form-control" name="room"></textarea>
+                </div>
+
+                
+
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+            <input type="submit" class="btn btn-primary" value="Сохранить"/>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>
+
+{/body}

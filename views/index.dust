@@ -76,12 +76,22 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Пятница</label>
-                            <input type="text" class="form-control" name="friday" />
+                            <div class="input-group date" id="datetimepicker5" data-target-input="nearest">
+                                <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker5" name="friday"/>
+                                <div class="input-group-append" data-target="#datetimepicker5" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                </div>
+                            </div>
                         </div>
     
                         <div class="form-group">
                             <label>Суббота</label>
-                            <input type="text" class="form-control" name="saturday" />
+                            <div class="input-group date" id="datetimepicker6" data-target-input="nearest">
+                                <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker6" name="saturday"/>
+                                <div class="input-group-append" data-target="#datetimepicker6" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                </div>
+                            </div>
                         </div>
     
                     </div>

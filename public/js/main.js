@@ -31,6 +31,8 @@ $(document).ready(function(){
 
 $(document).ready(function(){
     $('#datetimepicker4').datetimepicker();
+    $('#datetimepicker5').datetimepicker();
+    $('#datetimepicker6').datetimepicker();
 
     $('.open-day').on('click', function(){
         var friday = $(this).data('friday');

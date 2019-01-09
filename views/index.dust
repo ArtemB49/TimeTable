@@ -1,66 +1,60 @@
 {>"layout" /}
 
 {<body}
-    <button 
-        type="button" 
-        class="btn btn-primary btn-block"
-        data-toggle="modal"
-        data-target="#formModal">
-        Добавить
-    </button>
-    <br>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <!-- Кнопка добавления дня -->
+            <button 
+            type="button" 
+            class="btn btn-primary btn-block"
+            data-toggle="modal"
+            data-target="#formModal">
+            Добавить
+            </button>
 
-    {#weeks}
-    <div class="card">
-        <div class="card-header">
-            <h4>{friday_ru}</h4>
-            <h4>{saturday_ru}</h4>
-        </div>
-        <div class="card-body">
-            <form action="/day/{friday}&{saturday}">
-                <button     
-                    class="btn btn-success"
-                    type="submit"
-                    data-friday="{friday}"
-                    data-saturday="{saturday}">
-                    Открыть
-                </button>
-                <!--
-                <button 
-                    class="btn btn-default edit-recipe"
-                    data-toggle="modal"
-                    data-target="#editFormModal"
-                    data-id="{id}"
-                    data-name="{name}"
-                    data-ingredients="{ingridients}"
-                    data-directions="{descriptions}">
-                    Edit
-                </button>
-                <button     
-                    class="btn btn-danger delete-recipe"
-                    data-id="{id}">
-                    Delete
-                </button>
-                -->
-            </form>
-        </div>
-    </div>    
-    {/weeks}
-    
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="form-group">
-                    <div class="input-group date" id="datetimepicker4" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker4"/>
-                        <div class="input-group-append" data-target="#datetimepicker4" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
-                        </div>
-                    </div>
+
+            {#weeks}
+            <div class="card">
+                <div class="card-header">
+                    <h4>{friday_ru}</h4>
+                    <h4>{saturday_ru}</h4>
                 </div>
-            </div>
+                <div class="card-body">
+                    <form action="/day/2015/{friday}&{saturday}">
+                        <button     
+                            class="btn btn-success"
+                            type="submit"
+                            data-friday="{friday}"
+                            data-saturday="{saturday}">
+                            Открыть
+                        </button>
+                        <!--
+                        <button 
+                            class="btn btn-default edit-recipe"
+                            data-toggle="modal"
+                            data-target="#editFormModal"
+                            data-id="{id}"
+                            data-name="{name}"
+                            data-ingredients="{ingridients}"
+                            data-directions="{descriptions}">
+                            Edit
+                        </button>
+                        <button     
+                            class="btn btn-danger delete-recipe"
+                            data-id="{id}">
+                            Delete
+                        </button>
+                        -->
+                    </form>
+                </div>
+            </div>    
+            {/weeks}
+
         </div>
     </div>
+</div>
+
     
     <!-- Add Day Form-->
     <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
@@ -104,11 +98,12 @@
             </div>
     </div>
 
+
     <!-- Edit Form-->
     <div class="modal fade" id="editFormModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
-                  <form method="POST" action="/edit">
+                  <form method="POST" action="/edit/classes">
                     <input type="hidden" id="edit-form-id" name="id" />
                     <div class="modal-header">
                     <h5 class="modal-title" id="editFormModalLabel">Add recipe</h5>
@@ -140,10 +135,6 @@
                 </form>
               </div>
             </div>
-        </div>
-
-    
-
-    
+    </div>   
 
 {/body}

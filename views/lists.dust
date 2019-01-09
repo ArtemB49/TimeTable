@@ -1,0 +1,132 @@
+{>"layout" /}
+{<body}
+
+<div class="container-fluid">
+    <!-- Заголовки -->
+    <div class="row">
+        <div class="col-12 col-md-3 col-xl-2 bd-sidebar"> 
+            <div class="list-group">
+                <a href="/list/lessons" class="list-group-item list-group-item-action {@eq key=active value="lessons"}active{/eq} ">Занятия</a>
+                <a href="/list/teachers" class="list-group-item list-group-item-action {@eq key=active value="teachers"}active{/eq} ">Преподаватели</a>
+                <a href="/list/groups" class="list-group-item list-group-item-action {@eq key=active value="groups"}active{/eq} ">Группы</a>
+                <a href="#" class="list-group-item list-group-item-action disabled {@eq key=active value="rooms"}active{/eq}  ">Аудитории</a>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content" role="main">
+            <ul class="list-group">
+                <button 
+                    type="button" 
+                    class="btn btn-success btn-block"
+                    data-toggle="modal"
+                    data-target="#formModal">
+                    Добавить
+                </button>
+                {#items}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {name}
+                    <!-- Кнопка изменения объекта справочника-->
+                    <button 
+                        class="btn btn-default edit-item"
+                        data-toggle="modal"
+                        data-target="#editFormModal"
+                        data-name="{name}" 
+                        data-item_id="{id}"
+                        {@eq key=active value="groups"}
+                        data-year="{year_admission}"
+                        {/eq}
+                        {@eq key=active value="groups"}
+                        data-count="{students_count}"
+                        {/eq}
+                        >
+                        Изменить
+                    </button>
+                
+                </li>
+                {/items}
+            </ul>
+        </div>
+
+    </div>
+    <!-- Форма добавления элемента справочника-->
+    <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="POST" action="/add/{active}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="formModalLabel">Создание</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>{label}</label>
+                            <input id="edit-form-{active}" type="text" class="form-control" name="item" />
+                        </div>
+                        {@eq key=active value="groups"}
+                            <div class="form-group">
+                                <label>Год поступления</label>
+                                <input id="edit-form-{active}-year" type="number" class="form-control" name="year" />
+                            </div>
+                        {/eq}
+                        {@eq key=active value="groups"}
+                            <div class="form-group">
+                                <label>Количество студентов</label>
+                                <input id="edit-form-{active}-count" type="number" class="form-control" name="count" />
+                            </div>
+                        {/eq}
+                    
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                    <input type="submit" class="btn btn-primary" value="Добавить"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Форма изменения занятия-->
+    <div class="modal fade" id="editFormModal" tabindex="-1" role="dialog" aria-labelledby="editFormModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="POST" action="/edit/{active}">
+                    <input type="hidden" id="edit-form-id" name="item_id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editFormModalLabel">Изменение</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">            
+                        <div class="form-group">
+                            <label>{label}</label>
+                            <input id="edit-form-item" type="text" class="form-control" name="item" />
+                    </div>
+                    {@eq key=active value="groups"}
+                    <div class="form-group">
+                        <label>Год поступления</label>
+                        <input id="edit-form-group-year" type="number" class="form-control" name="year" />
+                    </div>
+                    {/eq}
+                    {@eq key=active value="groups"}
+                    <div class="form-group">
+                        <label>Количество студентов</label>
+                        <input id="edit-form-group-count" type="number" class="form-control" name="count" />
+                    </div>
+                    {/eq}
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                    <input type="submit" class="btn btn-primary" value="Сохранить"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</div>
+{/body}

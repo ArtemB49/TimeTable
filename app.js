@@ -9,8 +9,7 @@ var app = express();
 
 const { Pool } = require('pg');
 
-// DB Connect
-
+// Подключение к базе данных
 const pool = new Pool({
     connectionString: 'postgres://postgres:32243551@localhost/hse',
     port: 5432,
@@ -21,19 +20,20 @@ const pool = new Pool({
     connectionTimeoutMillis: 2000 
 });
 
-// 
+// Установка движка шаблонизатора 
 app.engine('dust', cons.dust);
 
 app.set('view engine', 'dust');
 app.set('views', __dirname + '/views');
 
-// Set Public Folder
+// Установка публичной папки
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Body Parser MiddleWare
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 
+// 
 app.get('/', async (request, response) => {
     try{
         const poolClient = await pool.connect()
@@ -108,6 +108,7 @@ app.get('/', async (request, response) => {
         
 });
 
+// Не используется
 app.get('/table', async (request, response) => {
     try{
         const poolClient = await pool.connect()
@@ -121,6 +122,7 @@ app.get('/table', async (request, response) => {
         const classiesDay2Time4 = await poolClient.query(queryDay, [7, '2015-01-01']); 
          
         const teachers = await poolClient.query('SELECT*FROM teachers');
+        const lessons = await poolClient.query('SELECT*FROM lessons');
             
             
         console.log(classiesDay1Time1.rows);
@@ -149,6 +151,7 @@ app.get('/table', async (request, response) => {
             classiesDay2Time4: classiesDay2Time4.rows,
 
             teachers: teachers.rows,
+            lessons: lessons.rows
         });
         poolClient.release();
     } catch(err){
@@ -158,6 +161,7 @@ app.get('/table', async (request, response) => {
     
 });
 
+// Добавление нового дня
 app.post('/add-day', async function(request, response){
     const poolClient = await pool.connect()
     for (let index = 1; index < 4; index++) {
@@ -171,6 +175,98 @@ app.post('/add-day', async function(request, response){
     response.redirect('/');
 });
 
+// Справочники
+app.get('/list/:name', async (request, response) => {
+    
+    try{       
+        const poolClient = await pool.connect()
+        var items;
+        var active;
+        var label;
+        switch (request.params.name) {
+            case 'lessons':
+                items = await poolClient.query('SELECT*FROM lessons');
+                active = 'lessons';
+                label = 'Занятие';
+            break;
+
+            case 'teachers':
+                items = await poolClient.query('SELECT*FROM teachers');
+                active = 'teachers'
+                label = 'Преподаватель';
+            break;
+
+            case 'groups':
+                items = await poolClient.query('SELECT*FROM groups');
+                active = 'groups'
+                label = 'Группа';
+            break;
+    
+            default:
+
+                break;
+        }
+
+        response.render(
+            'lists',
+            {
+                active: active,
+                items: items.rows,
+                label: label
+            });
+
+        poolClient.release();
+    } catch(err){
+        console.log(err);
+        poolClient.release();
+    }
+});
+
+app.get('/list/', async (request, response) => {
+    response.redirect('/list/lessons/');
+});
+
+// Добавление нового дня
+app.post('/add/:table', async function(request, response){
+
+    console.log( request.params.table);
+    console.log( request.body.item);
+    
+
+    const poolClient = await pool.connect()
+
+    switch (request.params.table) {
+        case 'teachers':
+        case 'lessons':
+
+            await poolClient.query("INSERT INTO " + request.params.table + "(name) VALUES($1)",
+                [
+                request.body.item
+                ]);  
+        break;
+
+        case 'groups':
+            await poolClient.query("INSERT INTO groups(name, year_admission, students_count) VALUES($1, $2, $3)",
+                [
+                    request.body.item,
+                    "01/01/" + request.body.year,
+                    request.body.count
+                ]);
+        break;
+    
+        default:
+            break;
+    }
+    
+       
+    //await poolClient.query()
+    
+
+    poolClient.release();
+    response.redirect(request.get('referer'));
+});
+
+// Не используется
 app.delete('/delete/:id', async function(request, response){
     const poolClient = await pool.connect()
     await poolClient.query('DELETE FROM recipes WHERE id = $1',
@@ -181,25 +277,64 @@ app.delete('/delete/:id', async function(request, response){
     response.sendStatus(200);
 });
 
-app.post('/edit', async function(request, response){
+// Изменение занятия
+app.post('/edit/:table', async function(request, response){
     const poolClient = await pool.connect()
-    await poolClient.query('UPDATE classes SET lesson_id=$1, teacher_id=$2 WHERE id = $3',
-        [
-            request.body.lesson,
-            request.body.teacher,
-            //request.body.room,
-            request.body.class_id
-        ]
-    );
+    switch (request.params.table) {
+        case 'classes':
+            await poolClient.query('UPDATE classes SET lesson_id=$1, teacher_id=$2 WHERE id = $3',
+                [
+                    request.body.lesson_id,
+                    request.body.teacher_id,
+                    request.body.class_id
+                ]
+            );
+        break;
+
+        case 'groups':
+            await poolClient.query('UPDATE groups SET name=$1, year_admission=$2, students_count=$3 WHERE id = $4',
+                [
+                    request.body.item,
+                    "01/01/" + request.body.year,
+                    request.body.count,
+                    request.body.item_id
+                ]
+            );
+        break;
+
+        case 'teachers':
+            await poolClient.query('UPDATE teachers SET name=$1 WHERE id = $2',
+                [
+                    request.body.item,
+                    request.body.item_id
+                ]
+            );
+        break;
+
+        case 'lessons':
+            await poolClient.query('UPDATE lessons SET name=$1 WHERE id = $2',
+                [
+                    request.body.item,
+                    request.body.item_id
+                ]
+            );
+        break;
+    
+        default:
+            break;
+    }
+    
 
     poolClient.release();
-    response.redirect('/');
+    response.redirect(request.get('referer'));
 });
 
-app.get('/day/:friday&:saturday', async function(request, response) {
+// Список занятий на оптеределенные даты 
+app.get('/day/:year/:friday&:saturday', async function(request, response) {
     
-    
-    console.log(request.params.date);
+    const friday = request.params.friday;
+    const saturday = request.params.saturday;
+    const year = request.params.year + "-01-01";
     
     try{
         const poolClient = await pool.connect()
@@ -208,8 +343,8 @@ app.get('/day/:friday&:saturday', async function(request, response) {
             FROM dates 
             WHERE date IN ($1, $2)`,
             [ 
-                request.params.friday,
-                request.params.saturday,
+                friday,
+                saturday,
             ]
         );
         const datesRows = datesResult.rows;
@@ -220,7 +355,7 @@ app.get('/day/:friday&:saturday', async function(request, response) {
         
         for (let i = 0; i < datesRows.length; i++) {
             const dateRow = datesRows[i];
-            var classiesAtTime = await poolClient.query(queryDay, [dateRow.id, '2015-01-01']);
+            var classiesAtTime = await poolClient.query(queryDay, [dateRow.id, year]);
             var time = classiesAtTime.rows[0].time;
             var dayOfWeek = weekday[(new Date(classiesAtTime.rows[0].date)).getDay()];
             classesOfWeekend.push(
@@ -241,7 +376,7 @@ app.get('/day/:friday&:saturday', async function(request, response) {
         
         console.log(groups); 
         const teachers = await poolClient.query('SELECT*FROM teachers'); 
-        
+        const lessons = await poolClient.query('SELECT*FROM lessons');
         
         const coutnOfGroups = await poolClient.query(`
             SELECT COUNT(*)
@@ -251,11 +386,23 @@ app.get('/day/:friday&:saturday', async function(request, response) {
             WHERE date_id = 1
         `);
 
+        const years = [
+            { year: '2015' },
+            { year: '2016' },
+            { year: '2017' },
+            { year: '2018' },
+        ];
+
         response.render('days', {
             
             classesOfWeekend: classesOfWeekend,
             teachers: teachers.rows,
+            lessons: lessons.rows,
             groups: groups,
+            years: years,
+            current_year: request.params.year,
+            friday: friday,
+            saturday: saturday,
         });
         poolClient.release();
     } catch(err){
@@ -265,17 +412,45 @@ app.get('/day/:friday&:saturday', async function(request, response) {
 
 });
 
-// Server
-app.listen(2000, function(){
-    console.log('Server Started On Port 2000');
+
+// API
+
+// Список занятий на оптеределенные даты 
+app.get('/api/classies/:group_id', async function(request, response) {
+    
+    const groupID = request.params.group_id;
+    
+    try{
+        const poolClient = await pool.connect()
+        var classiesOfGroup = await poolClient.query(queryClassiesOfGroup, [groupID]);
+            
+
+        response.json(
+            {            
+                classies: classiesOfGroup.rows
+            }
+        );
+        poolClient.release();
+    } catch(err){
+        console.log(err);
+        poolClient.release();
+    }     
+
 });
 
+// Запуск сервера
+app.listen(1515, function(){
+    console.log('Server Started On Port 1515');
+});
 
+// Запрос на получение списка занятий на определенный день
 const queryDay = `
 SELECT
     cl.id, 
     lessons.name AS lesson,
     teachers.name AS teacher,
+    lessons.id AS lesson_id,
+    teachers.id AS teacher_id,
     gr.name AS group,
     dt.date AS date,
     ti.time AS time
@@ -308,3 +483,34 @@ weekday[4] = "Четверг";
 weekday[5] = "Пятница";
 weekday[6] = "Суббота";
 
+
+const queryClassiesOfGroup = `
+
+SELECT
+    cl.id, 
+    lessons.name AS lesson,
+    teachers.name AS teacher,
+    lessons.id AS lesson_id,
+    teachers.id AS teacher_id,
+    gr.name AS group,
+    dt.date AS date,
+    ti.time AS time
+
+FROM ((((((public.classes AS cl
+INNER JOIN public.lessons
+ON lessons.id = lesson_id)
+INNER JOIN public.teachers
+ON teachers.id = teacher_id)
+INNER JOIN groups_of_class AS gs
+ON gs.class_id = cl.id)
+INNER JOIN groups AS gr
+ON gs.group_id = gr.id)
+INNER JOIN dates AS dt
+ON dt.id = cl.date_id)
+INNER JOIN times AS ti
+ON ti.id = dt.time_id)
+
+WHERE gr.id = $1
+AND dt.date > now()
+
+ORDER BY dt.date, ti.time`;

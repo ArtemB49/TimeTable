@@ -10,8 +10,10 @@
   "author": "Артем Беляев",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "*",
     "consolidate": "*",
+    "cookie-parser": "^1.4.3",
     "current-week-number": "^1.0.7",
     "dust": "*",
     "dustjs-helpers": "*",
@@ -19,7 +21,12 @@
     "express": "^4.16.4",
     "full-icu": "^1.2.1",
     "intl": "^1.2.5",
+    "jsonwebtoken": "^8.4.0",
+    "lodash": "^4.17.11",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
     "pg": "^7.7.1",
-    "popper.js": "^1.14.6"
+    "popper.js": "^1.14.6",
+    "socket.io": "^2.2.0"
   }
 }

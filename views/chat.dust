@@ -33,7 +33,7 @@
             <div class="chat">
                 <div class="chat-header clearfix">
                     <div class="chat-about">
-                        <div class="chat-num-users">Hello, <span id="name"></span>{username}</span></div>
+                        <div class="chat-num-users" id="username" data-username={username} data-user_id={user_id}>Hello, <span id="name"></span>{username}</span></div>
                     </div>
                     <div class="controls">
                         <a href="#" class="logout-btn">Logout</a>

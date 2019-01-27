@@ -28,10 +28,11 @@ $(".logout-btn").on('click', e => {
 });
 
 $( document ).ready( () => {
-    var socket = io.connect('http://10.10.0.26:1515');
+    var socket = io.connect('http://192.168.43.167:1515');
     socket.on('connected', function (msg) {
         console.log(msg);
-        socket.emit('receiveHistory');
+        var chat_id = 1;
+        socket.emit('receiveHistory', chat_id);
     });
 
     socket.on('message', addMessage);
@@ -46,10 +47,13 @@ $( document ).ready( () => {
         e.preventDefault();
 
         var selector = $("textarea[name='message']");
+        var username = $('#username').data('username');
+        var user_id = $('#username').data('user_id');
         var messageContent = selector.val().trim();
         console.log(messageContent);
+        console.log(username + "322");
         if(messageContent !== '') {
-            socket.emit('msg', messageContent);
+            socket.emit('msg', messageContent, {name: username, id: user_id});
             selector.val('');
         }
     });

@@ -1,7 +1,8 @@
 
 /* API приложения */
 
-const pool = require('./postgres');
+const { Pool } = require('pg');
+const pool = new Pool(require('./postgres'));
 const express = require('express');
 
 

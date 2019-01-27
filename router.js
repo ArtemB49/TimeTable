@@ -1,15 +1,20 @@
 
 /* Страницы Бэкенда */
-
-const pool = require('./postgres');
+const { Pool } = require('pg');
+const pool = new Pool(require('./postgres'));
 const currentWeekNumber = require('current-week-number');
 const Intl = require("intl");
 const express = require('express');
+const auth = require('./auth');
+const checkAuth = auth.checkAuth;
+
+
+
 
 
 
 module.exports = app => {
-    app.get('/', async (request, response) => {
+    app.get('/', checkAuth,  async (request, response) => {
         try{
             const poolClient = await pool.connect()
             const dates = await poolClient.query(`
@@ -137,7 +142,7 @@ module.exports = app => {
     });
     
     // Добавление нового дня
-    app.post('/add-day', async function(request, response){
+    app.post('/add-day', checkAuth, async function(request, response){
         const poolClient = await pool.connect()
         for (let index = 1; index < 4; index++) {
             await poolClient.query('INSERT INTO dates(date, time_id) VALUES($1, $2)', [request.body.friday, index]);      
@@ -151,7 +156,7 @@ module.exports = app => {
     });
     
     // Справочники
-    app.get('/list/:name', async (request, response) => {
+    app.get('/list/:name', checkAuth, async (request, response) => {
         
         try{       
             const poolClient = await pool.connect()
@@ -197,7 +202,7 @@ module.exports = app => {
         }
     });
     
-    app.get('/list/', async (request, response) => {
+    app.get('/list/', checkAuth, async (request, response) => {
         response.redirect('/list/lessons/');
     });
     
@@ -253,7 +258,7 @@ module.exports = app => {
     });
     
     // Изменение занятия
-    app.post('/edit/:table', async function(request, response){
+    app.post('/edit/:table', checkAuth, async function(request, response){
         const poolClient = await pool.connect()
         switch (request.params.table) {
             case 'classes':
@@ -305,7 +310,7 @@ module.exports = app => {
     });
     
     // Список занятий на оптеределенные даты 
-    app.get('/day/:year/:friday&:saturday', async function(request, response) {
+    app.get('/day/:year/:friday&:saturday', checkAuth, async function(request, response) {
         
         const friday = request.params.friday;
         const saturday = request.params.saturday;

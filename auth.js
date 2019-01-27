@@ -1,10 +1,14 @@
 const config = require('./config');
 const express = require('express');
 const passport = require('passport');
+
 const jwt = require('jsonwebtoken');
+// Защита от иньекций
 const _ = require('lodash');
-const pool = require('./postgres');
+// Обращение к БД
 const { Pool } = require('pg');
+const pool = new Pool(require('./postgres'));
+// Хеширует пароль
 const bcrypt = require('bcryptjs');
 
 
@@ -15,6 +19,7 @@ function checkAuth (req, res, next) {
     passport.authenticate('jwt', { session: false }, (err, decryptToken, jwtError) => {
         if(jwtError != void(0) || err != void(0)) return res.render('chat', { error: err || jwtError});
         req.user = decryptToken;
+        
         next();
     })(req, res, next);
 }
@@ -30,12 +35,13 @@ function createToken (body) {
 async function createUser(username, password){
     try {
         const passwordHash = bcrypt.hashSync(password, 12);
+        const group_id_placeholder = 1; 
         const poolClient = await pool.connect();
         await poolClient.query(qCreateUser, 
             [
                 username,
                 passwordHash,
-                1,
+                group_id_placeholder,              
                 'exaple@ya.ru'
             ]
         );   
@@ -75,7 +81,7 @@ module.exports = app => {
     // Чат
     app.get('/chat', checkAuth, function(request, response){
         
-        response.render('chat', { username: request.user.username });
+        response.render('chat', { username: request.user.username, user_id: request.user.id });
     });
 
     // Авторизация
@@ -87,9 +93,9 @@ module.exports = app => {
                 res.cookie('token', token, {
                     httpOnly: true
                 });
-
-                res.status(200).send({message: "User login success."});
-            } else res.status(400).send({message: "User not exist or password not correct"});
+                
+                res.status(200).send({message: "Успешная Авторизация"});
+            } else res.status(400).send({message: "Данные пользователя не корректны"});
         } catch (e) {
             console.error("E, login,", e);
             res.status(500).send({message: "some error"});
@@ -102,7 +108,7 @@ module.exports = app => {
             let user = await findUser({$regex: _.escapeRegExp(req.body.username), $options: "i"});
             console.log(user);
             
-            if(user != null) return res.status(400).send({message: "User already exist"});
+            if(user != null) return res.status(400).send({message: "Имя пользователя занято"});
 
             user = createUser(req.body.username, req.body.password);
 
@@ -112,7 +118,7 @@ module.exports = app => {
                 httpOnly: true
             });
 
-            res.status(200).send({message: "User created."});
+            res.status(200).send({message: "Успешная регистрация"});
 
         } catch (e) {
             console.error("E, register,", e);
@@ -131,3 +137,4 @@ module.exports = app => {
 const qCreateUser = 'INSERT INTO students(name, password, group_id, email) VALUES($1, $2, $3, $4)';
 const qGetNewUser = 'SELECT * FROM students ORDER BY id DESC LIMIT 1';
 
+module.exports.checkAuth = checkAuth;

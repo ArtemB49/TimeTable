@@ -1,7 +1,7 @@
 
 /* Чат */
-
-const pool = require('./postgres');
+const { Pool } = require('pg');
+const pool = new Pool(require('./postgres'));
 
 module.exports = io => {
 
@@ -13,12 +13,12 @@ module.exports = io => {
         socket.join('all');
     
         // Обработка сообщения
-        socket.on('msg', async content => {
+        socket.on('msg', async (content, user) => {
             const obj = {
                 date: new Date(),
                 content: content,
-                username: 'Artem',
-                user_id: 1,
+                username: user.name,
+                user_id: user.id,
                 chat_id: 1
             };
 
@@ -37,12 +37,11 @@ module.exports = io => {
             socket.to('all').emit("message", obj);
         });
     
-        socket.on('receiveHistory', async () => {
+        socket.on('receiveHistory', async (chat_id) => {
             const poolClient = await pool.connect()            
             const messages = await poolClient.query(queryHistory, 
                 [
-                    1,
-                    1,
+                    chat_id,
                 ]
             );
             poolClient.release(); 
@@ -62,4 +61,4 @@ SELECT
 FROM messages AS m
     INNER JOIN students AS st
         ON m.user_id = st.id
-WHERE user_id = $1 AND chat_id = $2 `;
+WHERE chat_id = $1 `;
